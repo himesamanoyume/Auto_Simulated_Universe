@@ -237,7 +237,8 @@ class SimulatedUniverse(UniverseUtils):
                 f"计数:{self.count} 已使用：{tm//60}小时{tm%60}分钟  平均{tm//self.my_cnt}分钟一次  预计剩余{remain//60}小时{remain%60}分钟",
                 cnt=str(self.count),
             )
-            >= 34
+            # 设置通关次数
+            >= 2
             and self.debug == 0
         ):
             self._stop = 1
