@@ -226,7 +226,7 @@ class SimulatedUniverse(UniverseUtils):
         self.update_count(0)
         self.my_cnt += 1
         tm = int((time.time() - self.init_tm) / 60)
-        remain = 34 - self.count
+        remain = 2 - self.count
         if remain > 0:
             remain = int(remain * (time.time() - self.init_tm) / self.my_cnt / 60)
         else:
