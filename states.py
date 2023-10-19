@@ -70,8 +70,8 @@ class SimulatedUniverse(UniverseUtils):
                 self.validation = 0
         else:
             self.validation = 1
-        if "debug" in version and not gui:
-            log.info("欢迎加入模拟宇宙小群，群号：921407322 密码：xyzzyx")
+        # if "debug" in version and not gui:
+        #     log.info("欢迎加入模拟宇宙小群，群号：921407322 密码：xyzzyx")
         self.now_map = None
         self.now_map_sim = None
         self.real_loc = [0, 0]
