@@ -228,6 +228,7 @@ class UniverseUtils:
     def click(self, points, click=1):
         if self.debug == 2:
             print(points)
+        self.print_stack()
         x, y = points
         # 如果是浮点数表示，则计算实际坐标
         if type(x) != type(0):
@@ -886,7 +887,7 @@ class UniverseUtils:
                     self.press("w", 1.6)
                     pyautogui.click()
             if type == 3:
-                for i in "wwwwww":
+                for i in range(6):
                     self.get_screen()
                     if self.check("f", 0.4443, 0.4417, mask="mask_f1"):
                         log.info("大图识别到传送点")
@@ -896,8 +897,9 @@ class UniverseUtils:
                             break
                     self.get_screen()
                     if isrun(self):
-                        self.move_to_end()
-                        self.press(i, 0.3)
+                        if i in [0,4]:
+                            self.move_to_end()
+                        self.press('w', 0.45)
                         time.sleep(0.2)
             # 离目标点挺近了，准备找下一个目标点
             elif nds <= 20:
@@ -1113,3 +1115,12 @@ class UniverseUtils:
                 if not (sred == loc_scr[k, t]).all():
                     return 0
         return 1
+
+    def print_stack(self, num=1):
+        if self.debug:
+            stk = traceback.extract_stack()
+            for i in range(num):
+                try:
+                    print(stk[-2].name,stk[-3-i].filename.split('\\')[-1].split('.')[0],stk[-3-i].name,stk[-3-i].lineno)
+                except:
+                    pass
