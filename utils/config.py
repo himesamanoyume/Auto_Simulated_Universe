@@ -22,7 +22,7 @@ class Config:
         self.speed_mode = 0
         self.force_update = 0
         self.unlock = 0
-        self.bonus = 0
+        self.bonus = 1
         self.timezones = ['America', 'Asia', 'Europe', 'Default']
         self.timezone = 'Default'
         self.origin_key = ['f','m','shift','v','e','w','a','s','d','1','2','3','4']

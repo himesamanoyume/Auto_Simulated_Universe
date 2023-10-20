@@ -32,7 +32,7 @@ version = "v5.82 Omega"
 
 class SimulatedUniverse(UniverseUtils):
     def __init__(
-        self, find, debug, show_map, speed, nums=10000, unlock=False, bonus=False, update=0, gui=0
+        self, find, debug, show_map, speed, nums=2, unlock=False, bonus=True, update=0, gui=0
     ):
         super().__init__()
         # t1 = threading.Thread(target=os.system,kwargs={'command':'notif.exe > NUL 2>&1'})
@@ -228,8 +228,7 @@ class SimulatedUniverse(UniverseUtils):
         self.update_count(0)
         self.my_cnt += 1
         tm = int((time.time() - self.init_tm) / 60)
-        # 设置通关次数
-        remain = 1 - self.count
+        remain = 34 - self.count
         if remain > 0:
             remain = int(remain * (time.time() - self.init_tm) / self.my_cnt / 60)
         else:
@@ -240,8 +239,7 @@ class SimulatedUniverse(UniverseUtils):
                 f"计数:{self.count} 已使用：{tm//60}小时{tm%60}分钟  平均{tm//self.my_cnt}分钟一次  预计剩余{remain//60}小时{remain%60}分钟",
                 cnt=str(self.count),
             )
-            # 设置通关次数
-            >= 1
+            >= 34
             and self.debug == 0
         ) and self.nums == 10000:
             log.info('已完成每周上限，停止运行')
@@ -962,7 +960,7 @@ if __name__ == "__main__":
         show_map = 0
         update = 0
         speed = 0
-        bonus = 0
+        bonus = 1
         nums = 10000
         for i in sys.argv[1:]:
             st = i.split("-")[-1]
