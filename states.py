@@ -226,7 +226,8 @@ class SimulatedUniverse(UniverseUtils):
         self.update_count(0)
         self.my_cnt += 1
         tm = int((time.time() - self.init_tm) / 60)
-        remain = 2 - self.count
+        # 设置通关次数
+        remain = 1 - self.count
         if remain > 0:
             remain = int(remain * (time.time() - self.init_tm) / self.my_cnt / 60)
         else:
@@ -238,7 +239,7 @@ class SimulatedUniverse(UniverseUtils):
                 cnt=str(self.count),
             )
             # 设置通关次数
-            >= 2
+            >= 1
             and self.debug == 0
         ):
             self._stop = 1
