@@ -37,6 +37,7 @@ class SimulatedUniverse(UniverseUtils):
         super().__init__()
         # t1 = threading.Thread(target=os.system,kwargs={'command':'notif.exe > NUL 2>&1'})
         # t2 = threading.Thread(target=os.system,kwargs={'command':'python notif.py > NUL 2>&1'})
+        time.sleep(2)
         log.info("当前版本：" + version + "  当前命途：" + self.fate)
         if gui:
             try:
