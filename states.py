@@ -32,7 +32,7 @@ version = "v5.82 Omega"
 
 class SimulatedUniverse(UniverseUtils):
     def __init__(
-        self, find, debug, show_map, speed, nums=2, unlock=False, bonus=True, update=0, gui=0
+        self, find, debug, show_map, speed, nums=1, unlock=False, bonus=False, update=0, gui=0
     ):
         super().__init__()
         # t1 = threading.Thread(target=os.system,kwargs={'command':'notif.exe > NUL 2>&1'})
@@ -81,7 +81,7 @@ class SimulatedUniverse(UniverseUtils):
         self.img_set = []
         self.find = find
         self.debug = debug
-        self.speed = speed
+        self.speed = 1
         self._show_map = show_map & find
         self.floor = 0
         self.count = 0
@@ -959,8 +959,8 @@ if __name__ == "__main__":
         debug = 0
         show_map = 0
         update = 0
-        speed = 0
-        bonus = 1
+        speed = 1
+        bonus = 0
         nums = 10000
         for i in sys.argv[1:]:
             st = i.split("-")[-1]
