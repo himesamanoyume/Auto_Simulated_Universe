@@ -503,6 +503,7 @@ class SimulatedUniverse(UniverseUtils):
                     log.info(f"通关！当前层数:{self.floor+1}")
                 elif self.debug == 2:
                     map_log.error(f"地图{self.now_map}出现问题,退出程序")
+                    log.info('地图错误')
                     notif(f"地图{self.now_map}出现问题,退出程序", "DEBUG")
                     self._stop = 1
                 elif self.fail_count <= 1:
