@@ -969,7 +969,7 @@ if __name__ == "__main__":
         update = 0
         speed = 1
         bonus = 0
-        nums = 10000
+        nums = 1
         for i in sys.argv[1:]:
             st = i.split("-")[-1]
             if "=" not in st:
