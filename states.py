@@ -104,6 +104,7 @@ class SimulatedUniverse(UniverseUtils):
         if bonus:
             ex_notif = " 自动领取沉浸奖励"
             log.info(ex_notif)
+        log.info(f"将运行{self.nums}次")
         self.update_count()
         notif("开始运行" + ex_notif, f"初始计数：{self.count}")
         set_debug(debug > 0)
