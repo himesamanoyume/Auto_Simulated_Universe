@@ -27,6 +27,8 @@ class Abyss(UniverseUtils):
             self.team = [config[:4], config[4:]]
 
     def start_abyss(self):
+        self.fail_drag = 0
+        self.end_battle_time = 0
         while self._stop == 0:
             hwnd = win32gui.GetForegroundWindow()  # 根据当前活动窗口获取句柄
             Text = win32gui.GetWindowText(hwnd)
@@ -45,9 +47,13 @@ class Abyss(UniverseUtils):
                 Text = win32gui.GetWindowText(hwnd)
             self.route()
             time.sleep(0.2)
+            if self.fail_drag > 4:
+                self.press('esc')
+                break
 
-    def wait(self):
+    def wait(self,peila=False):
         tm = time.time()
+        ee = 0
         while self._stop == 0:
             self.get_screen()
             hwnd = win32gui.GetForegroundWindow()  # 根据当前活动窗口获取句柄
@@ -55,14 +61,33 @@ class Abyss(UniverseUtils):
             if self.check("auto_2", 0.0583, 0.0769) or Text != "崩坏：星穹铁道":
                 tm = time.time()
             if self.check("c", 0.9464, 0.1287, threshold=0.985):
-                # self.press('v')
-                pass
+                if peila:
+                    tm = time.time()
+                    if self.check("peila", 0.6953,0.1880, mask="battle_mask"):
+                        if ee == 3:
+                            ee = 0
+                        else:
+                            self.press(' ')
+                            time.sleep(0.2)
+                            ee += 1
+                        self.press('v')
+                    else:
+                        self.press('v')
+                else:
+                    self.press('v')
+            if peila and self.check_auto():
+                self.press('v')
+                tm = time.time()
             if time.time() - tm > 14 or self.check("abyss/in", 0.9130, 0.6074):
-                # print(time.time() - tm)
+                if self.click_text(['返回忘却之庭']):
+                    time.sleep(1.5)
+                self.end_battle_time = time.time()
                 break
             time.sleep(0.1)
 
     def ready(self):
+        img = self.get_screen()
+        peila = self.ts.find_text(img, ['佩拉']) is not None
         for i in range(4):
             self.press(str(i + 1), 0.2)
             time.sleep(0.4)
@@ -79,31 +104,14 @@ class Abyss(UniverseUtils):
         time.sleep(1)
         pyautogui.click()
         time.sleep(3.5)
+        return peila
 
     def route(self):
-        self.get_screen()
+        img = self.get_screen()
         # self.click_target('imgs/abyss/fail.jpg',0.9,True)
         if self.check("abyss/fail", 0.5995, 0.1343):
             self.click((0.5995, 0.1343))
-        elif self.check("abyss/in", 0.9130, 0.6074):
-            time.sleep(2.5)
-            self.click((0.5, 0.14))
-            time.sleep(2)
-            self.press("w", 3.5)
-            t = self.move_to_interac(1, 1)
-            if abs(t) > 30:
-                self.press("w", 1)
-            self.ready()
-            self.wait()
-            if abs(t) > 30:
-                time.sleep(1)
-                self.press("w")
-                time.sleep(0.3)
-                self.move_to_interac(1, 1)
-                self.press("w", 1.7)
-                self.ready()
-                self.wait()
-        elif self.check("abyss/team", 0.6500, 0.4019):
+        elif self.ts.find_text(img, ['角色编队']) is not None:
             if self.check("abyss/begin", 0.1062, 0.0815):
                 self.click((0.1062, 0.0806))
                 return
@@ -120,6 +128,26 @@ class Abyss(UniverseUtils):
                         )
                         time.sleep(0.2)
             self.click((0.1062, 0.0806))
+            time.sleep(1)
+        elif self.ts.find_text(img[:600,:600], ['取得胜利时']) is not None:
+            time.sleep(2)
+            if time.time() - self.end_battle_time > 10:
+                self.click((0.5, 0.14))
+            time.sleep(2)
+            self.press("w", 3.5)
+            t = self.move_to_interac(1, 1)
+            if abs(t) > 30:
+                self.press("w", 1)
+            peila = self.ready()
+            self.wait(peila=peila)
+            if abs(t) > 30:
+                time.sleep(1)
+                self.press("w")
+                time.sleep(0.3)
+                self.move_to_interac(1, 1)
+                self.press("w", 1.7)
+                peila = self.ready()
+                self.wait(peila=peila)
         elif self.check("abyss/6", 0.5661, 0.5713):
             self.click((0.5, 0.2))
         elif self.check("abyss/5", 0.1125, 0.9389):
@@ -144,6 +172,7 @@ class Abyss(UniverseUtils):
                 self.click((1 - res[0] / self.xx + 0.06, 1 - res[1] / self.yy + 0.02))
             else:
                 self.drag((0.5, 0.5), (0.8 - 0.6 * random.randint(0, 1), 0.5))
+                self.fail_drag += 1
         else:
             print('未知界面')
             self.click((0.5, 0.14))

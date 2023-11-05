@@ -27,7 +27,7 @@ except:
     from utils.mylib import get_direc_only_minimap, ban, isrun
 
 # 版本号
-version = "v5.82 Omega"
+version = "v5.9 Max"
 
 
 class SimulatedUniverse(UniverseUtils):
@@ -175,7 +175,7 @@ class SimulatedUniverse(UniverseUtils):
                 break
             self.get_screen()
             ban(self)
-            #self.click_target('imgs/reset.jpg',0.9,True) # 如果需要输出某张图片在游戏窗口中的坐标，可以用这个
+            #self.click_target('imgs/skill_pt.jpg',0.9,True) # 如果需要输出某张图片在游戏窗口中的坐标，可以用这个
             """
             if begin and not self.check("f", 0.4437,0.4231) and not self.check("abyss/1",0.8568,0.6769):
                 begin = 0
@@ -303,7 +303,7 @@ class SimulatedUniverse(UniverseUtils):
                 if res_up[1] == 2:
                     self.click(self.calc_point((0.5047, 0.5491), res_up[0]))
                     chose = 1
-                elif res_down[1] == 2 and (res_up[1] != 3 or self.fate != "毁灭"):
+                elif res_down[1] == 2:
                     self.click(self.calc_point((0.5042, 0.3204), res_down[0]))
                     chose = 1
                 if not chose:
@@ -329,8 +329,10 @@ class SimulatedUniverse(UniverseUtils):
                 )
                 if res_up[1] >= 2:
                     self.click(self.calc_point((0.5047, 0.5491), res_up[0]))
-                else:
+                elif res_down[1] >= 2:
                     self.click(self.calc_point((0.5042, 0.3204), res_down[0]))
+                else:
+                    self.click(self.calc_point((0.5047, 0.5491), res_up[0]))
             self.click((0.1203, 0.1093))
             time.sleep(1.4)
             self.confirm_time = time.time()
@@ -672,15 +674,18 @@ class SimulatedUniverse(UniverseUtils):
             self.confirm_time = time.time()
         elif self.check("setting", 0.9734, 0.3009, threshold=0.98):
             self.click((0.9734, 0.3009))
-            time.sleep(2)
+            time.sleep(1.75)
+        elif self.check("setting2", 0.9490,0.9389):
             self.click((0.3505,0.9398))
-            time.sleep(2.5)
-            self.click_text(["战斗功能"])
-            for _ in range(5):
-                pyautogui.scroll(-1)
-                time.sleep(0.1)
-            time.sleep(0.3)
+            time.sleep(1.75)
+        elif self.check("setting3", 0.9490,0.9389):
+            if self.click_text(["战斗功能"]):
+                for _ in range(5):
+                    pyautogui.scroll(-1)
+                    time.sleep(0.1)
+                time.sleep(0.3)
             self.click_text(["脱离卡死"])
+            time.sleep(1)
         elif self.check("enhance", 0.9208, 0.9380):
             self.quit = time.time()
             time.sleep(1.5)
