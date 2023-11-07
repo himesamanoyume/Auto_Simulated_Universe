@@ -81,7 +81,7 @@ class SimulatedUniverse(UniverseUtils):
         self.img_set = []
         self.find = find
         self.debug = debug
-        self.speed = 1
+        self.speed = 0
         self._show_map = show_map & find
         self.floor = 0
         self.count = 0
@@ -974,7 +974,7 @@ if __name__ == "__main__":
         debug = 0
         show_map = 0
         update = 0
-        speed = 1
+        speed = 0
         bonus = 0
         nums = 1
         for i in sys.argv[1:]:
