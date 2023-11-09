@@ -32,13 +32,31 @@ version = "v5.9 Max"
 
 class SimulatedUniverse(UniverseUtils):
     def __init__(
-        self, find, debug, show_map, speed, nums=1, unlock=False, bonus=False, update=0, gui=0
+        self, find, debug, show_map, speed, nums=1, unlock=False, bonus=False, update=0, gui=0,fate=4
     ):
         super().__init__()
         # t1 = threading.Thread(target=os.system,kwargs={'command':'notif.exe > NUL 2>&1'})
         # t2 = threading.Thread(target=os.system,kwargs={'command':'python notif.py > NUL 2>&1'})
         time.sleep(2)
-        log.info("当前版本：" + version + "  当前命途：" + self.fate)
+        if fate==0:
+            fate = '存护'
+        elif fate==1:
+            fate = '记忆'
+        elif fate==2:
+            fate = '虚无'
+        elif fate==3:
+            fate = '丰饶'
+        elif fate==4:
+            fate = '巡猎'
+        elif fate==5:
+            fate = '毁灭'
+        elif fate==6:
+            fate = '欢愉'
+        elif fate==7:
+            fate = '繁育'
+        else:
+            fate = '巡猎'
+        log.info("当前版本：" + version + "  当前命途：" + fate)
         if gui:
             try:
                 lowest = (
@@ -93,6 +111,7 @@ class SimulatedUniverse(UniverseUtils):
         self.unlock = unlock
         self.check_bonus = bonus
         self.bonus = bonus
+        self.fate = fate
         self.kl = 0
         self.gui = gui
         self.fail_count = 0
@@ -955,7 +974,7 @@ class SimulatedUniverse(UniverseUtils):
 
 def main():
     log.info(f"find: {find}, debug: {debug}, show_map: {show_map}")
-    su = SimulatedUniverse(find, debug, show_map, speed, nums=nums, bonus=bonus, update=update)
+    su = SimulatedUniverse(find, debug, show_map, speed, nums=nums, bonus=bonus, update=update, fate=fate)
     try:
         su.start()
     except ValueError as e:
@@ -977,6 +996,7 @@ if __name__ == "__main__":
         speed = 0
         bonus = 0
         nums = 1
+        fate = 4
         for i in sys.argv[1:]:
             st = i.split("-")[-1]
             if "=" not in st:
