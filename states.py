@@ -277,10 +277,15 @@ class SimulatedUniverse(UniverseUtils):
         bk_lst_changed = self.lst_changed
         self.lst_changed = time.time()
         # 战斗界面
+        # 需要打开二倍速
+        if self.check("2x_speed_off", 0.1489, 0.975, threshold=0.985):
+            log.info(f"未开启二倍速,现已开启二倍速")
+            self.press("b")
         if self.check("c", 0.9464, 0.1287, threshold=0.985) or self.check(
             "auto_2", 0.0583, 0.0769):
             # 需要打开自动战斗
             if self.check("c", 0.9464, 0.1287, threshold=0.985):
+                log.info(f"未自动战斗,现已开启自动战斗")
                 self.press("v")
             if time.time() - self.f_time < 20:
                 self.f_time = 0
