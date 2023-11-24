@@ -20,6 +20,7 @@ class Config:
         self.show_map_mode = 0
         self.debug_mode = 0
         self.speed_mode = 0
+        self.slow_mode = 0
         self.force_update = 0
         self.unlock = 0
         self.bonus = 1
@@ -63,6 +64,7 @@ class Config:
                     self.speed_mode = config['speed_mode']
                     self.force_update = config['force_update']
                     self.timezone = config['timezone']
+                    self.slow_mode = config['slow_mode']
                 except:
                     pass
             with open(os.path.join(self.abspath, self.text), "r", encoding="utf-8", errors='ignore') as f:
@@ -92,7 +94,7 @@ class Config:
                 with open(os.path.join(self.abspath, 'info_example.yml'), "r", encoding="utf-8", errors='ignore') as f:
                     prior = yaml.safe_load(f)['prior']
             except:
-                prior = {'奇物': ['福灵胶', '博士之袍', '降维骰子', '信仰债券', '时空棱镜', '朋克洛德', '香涎干酪'],
+                prior = {'奇物': ['福灵胶', '博士之袍', '陨石球', '降维骰子', '信仰债券', '时空棱镜', '朋克洛德', '香涎干酪', '龋齿星系'],
                          '事件': ['购买一个','丢下雕像','和序列扑满玩','信仰星神','克里珀的恩赐','哈克的藏品',
                                   '动作片','感恩克里珀星神','换取1个星祝福','星神的记载','翻开牌','摧毁黑匣','1个1星祝福',
                                   '1个1-星祝福','选择里奥'],
@@ -129,6 +131,7 @@ class Config:
                     "show_map_mode": self.show_map_mode,
                     "debug_mode": self.debug_mode,
                     "speed_mode": self.speed_mode,
+                    "slow_mode": self.slow_mode,
                     "force_update": self.force_update,
                     "timezone": self.timezone
                 },

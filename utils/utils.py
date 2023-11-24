@@ -23,11 +23,8 @@ from utils.config import config
 from utils.log import log
 import utils.ocr as ocr
 import utils.keyops as keyops
-try:
-    from mylib import isrun
-except:
-    from utils.mylib import isrun
 from utils.screenshot import Screen
+import threading
 
 
 def notif(title, msg, cnt=None):
@@ -81,6 +78,7 @@ class UniverseUtils:
         self.check_bonus = 1
         self._stop = False
         self.stop_move = 0
+        self.move = 0
         self.multi = config.multi
         self.diffi = config.diffi
         self.fate = config.fate
@@ -91,6 +89,7 @@ class UniverseUtils:
         self.last_info = ''
         self.mini_target = 0
         self.f_time = 0
+        self.slow = 0
         self.init_ang = 0
         self.img_map = dict()
         # 用户选择的命途
@@ -134,7 +133,11 @@ class UniverseUtils:
                 win32gui.ReleaseDC(hwnd, dc)
                 scale_x = dpi_x / 96
                 scale_y = dpi_y / 96
-                self.scale = ctypes.windll.user32.GetDpiForWindow(hwnd) / 96.0
+                try:
+                    self.scale = ctypes.windll.user32.GetDpiForWindow(hwnd) / 96.0
+                except:
+                    log.info('DPI获取失败')
+                    self.scale = 1.0
                 log.info(
                     "DPI: " + str(self.scale) + " A:" + str(int(self.multi * 100) / 100)
                 )
@@ -171,6 +174,8 @@ class UniverseUtils:
     def press(self, c, t=0):
         if c not in "3r":
             log.debug(f"按下按钮 {c}，等待 {t} 秒后释放")
+        if self.slow and c=='shift':
+            return
         if self._stop == 0:
             keyops.keyDown(c)
         else:
@@ -548,7 +553,7 @@ class UniverseUtils:
         return ang
 
     def get_level(self):
-        while not isrun(self):
+        while not self.isrun():
             time.sleep(0.1)
             self.get_screen()
         time.sleep(max(0, (self.fail_count - 1) * 10))
@@ -704,7 +709,7 @@ class UniverseUtils:
             self.get_screen()
             if not self.check(
                     "f", 0.4443, 0.4417, mask="mask_f1"
-                ) and not isrun(self):
+                ) and not self.isrun():
                 ava = 1
         log.info('交互点生效：'+str(ava))
         if ava:
@@ -786,13 +791,14 @@ class UniverseUtils:
             dls = [100000]
             dtm = [time.time()]
             t = 2
+            c = 0
             for i in range(3000):
                 if self._stop == 1:
                     keyops.keyUp("w")
                     return
                 ctm = time.time()
                 bw_map = self.get_bw_map()
-                self.get_loc(bw_map, fbw=1, offset=self.get_offset(2+(i<=2)), rg=10+6*(i<=2))
+                self.get_loc(bw_map, fbw=1, offset=self.get_offset(2+(c<=2)), rg=10+6*(c<=2))
                 self.get_real_loc(2)
                 ang = (
                     math.atan2(loc[0] - self.real_loc[0], loc[1] - self.real_loc[1])
@@ -821,16 +827,20 @@ class UniverseUtils:
                         keyops.keyUp("w")
                         self.press("s", 0.35)
                         self.press(ts[t], 0.2*random.randint(1,3))
-                        if self._stop == 0:
-                            keyops.keyDown("w")
-                        bw_map = self.get_bw_map()
+                        self.press("w", 0.3)
+                        self.move = 1
+                        self.get_screen()
+                        threading.Thread(target=self.keep_move).start()
+                        bw_map = self.get_bw_map(gs=0)
                         self.get_loc(bw_map, rg=28, fbw=1)
-                        local_screen = self.get_local(0.9333, 0.8657, shape)
-                        self.ang = 360 - self.get_now_direc(local_screen) - 90
+                        self.get_real_loc()
+                        self.move = 0
+                        time.sleep(0.12)
                         t -= 1
                         dls = [100000]
                         dtm = [time.time()]
                         self.press('shift')
+                        c = 0
                         sft = 1
                     else:
                         keyops.keyUp("w")
@@ -859,15 +869,16 @@ class UniverseUtils:
                         if self.nof(must_be='tp'):
                             log.info('大图识别到传送点!')
                             return
-                    elif (type != 3 and self.goodf()) or not isrun(self):
+                    elif (type != 3 and self.goodf()) or not self.isrun():
                         keyops.keyUp("w")
                         break
                 ds = nds
                 dls.append(ds)
                 dtm.append(time.time())
-                while dtm[0] < time.time() - 1.5 + sft * 1:
+                while dtm[0] < time.time() - 1.7 + sft * 1 - self.slow * 0.4:
                     dtm = dtm[1:]
                     dls = dls[1:]
+                c += 1
             log.info(f"进入新地图或者进入战斗 {nds}")
             if type == 0:
                 self.lst_tm = time.time()
@@ -890,7 +901,7 @@ class UniverseUtils:
                     self.press("w", 1.6)
                     pyautogui.click()
             if type == 3:
-                for i in range(6):
+                for i in range(9):
                     self.get_screen()
                     if self.check("f", 0.4443, 0.4417, mask="mask_f1"):
                         log.info("大图识别到传送点")
@@ -899,10 +910,10 @@ class UniverseUtils:
                             time.sleep(1.5)
                             break
                     self.get_screen()
-                    if isrun(self):
+                    if self.isrun():
                         if i in [0,4]:
                             self.move_to_end()
-                        self.press('w', 0.45)
+                        self.press('w', 0.5)
                         time.sleep(0.2)
             # 离目标点挺近了，准备找下一个目标点
             elif nds <= 20:
@@ -912,6 +923,16 @@ class UniverseUtils:
                     self.lst_changed = time.time()
                 except:
                     pass
+
+    def keep_move(self):
+        op = 'ws'
+        i = 0
+        while self.move and not self._stop:
+            self.press(op[i], 0.05)
+            time.sleep(0.08)
+            i ^= 1
+        if not self._stop:
+            keyops.keyDown("w")
 
     # 视角转动x度
     def mouse_move(self, x, fine=1):
@@ -1016,6 +1037,8 @@ class UniverseUtils:
         self.real_loc = (int(x+10+dx),int(y+dy))
 
     def get_offset(self,delta=1):
+        if self.slow:
+            delta /= 2
         pi = 3.141592653589
         dx, dy = sin(self.ang/180*pi), cos(self.ang/180*pi)
         return (delta*dx*3,delta*dy*3)
@@ -1136,3 +1159,197 @@ class UniverseUtils:
         mask = cv.inRange(cvt, lower, upper)
         result = np.sum(mask)//255
         return result > 180 and result < 280
+    
+    def isrun(self):
+        scr = self.screen
+        shape = (int(self.scx * 12), int(self.scx * 12))
+        loc_scr = self.get_local(0.9333, 0.8657, shape)
+        hsv = cv.cvtColor(loc_scr, cv.COLOR_BGR2HSV)  # 转HSV
+        lower = np.array([93, 120, 60])  # 90 改成120只剩箭头，但是角色移动过的印记会消失
+        upper = np.array([97, 255, 255])
+        mask = cv.inRange(hsv, lower, upper)  # 创建掩膜
+        sum = np.sum(mask)
+        scr_bak = deepcopy(scr)
+        scr[np.min(scr,axis=-1)<=220]=[0,0,0]
+        scr[np.min(scr,axis=-1)>220]=[255,255,255]
+        res = self.check('run',0.876,0.7815,threshold=0.91) and sum > 40000 and sum < 65000
+        if self.tm>0.96:
+            res = 1
+        self.screen = deepcopy(scr_bak)
+        if res:
+            self.f_time = 0
+        return res
+
+    def get_direc_only_minimap(self):
+        if self.debug==2:
+            print('mini',self.ang_off,self.mini_state)
+        self.ang_neg=self.ang_off<0
+        if self.ang_off:
+            time.sleep(0.6)
+            self.mouse_move(-self.ang_off*1.2)
+            time.sleep(0.3)
+            self.press('w',0.3)
+        if self.mini_state==1 and self.floor in [4,8,11]:
+            time.sleep(0.5)
+            self.press('w',0.55)
+            pyautogui.click()
+            time.sleep(1.2)
+            self.press('w')
+            time.sleep(0.4)
+        if self.mini_state==3 and self.floor==12 and not self.check_bonus:
+            self.mini_state+=2
+            return
+        if self.mini_state==3 and self.floor in [3,7,12] and self.check_bonus:
+            self.press('d',0.45)
+            keyops.keyDown('w')
+            nt = time.time()
+            while time.time()-nt<1.3:
+                self.get_screen()
+                if self.check("f", 0.4443, 0.4417, mask="mask_f1"):
+                    self.press('f')
+                    keyops.keyUp('w')
+                    break
+            keyops.keyUp('w')
+            self.press('f')
+            time.sleep(1)
+            for _ in range(2):
+                if not self.check_bonus:
+                    break
+                self.get_screen()
+                if self.check('bonus_c',0.2385,0.6685):
+                    self.click((0.4453,0.3250))
+                    time.sleep(0.5)
+                    self.get_screen()
+                    if self.check("yes1", 0.5, 0.5, mask="mask_end"):
+                        self.check_bonus = 0
+                    self.click((0.5062, 0.1454))
+                    time.sleep(1.2)
+            keyops.keyUp('w')
+            self.get_screen()
+            if self.check('bonus_c',0.2385,0.6685):
+                self.click((0.2385,0.6685))
+            self.mini_state+=2
+            if self.floor==12:
+                return
+            self.press('s',0.4)
+        self.ang_off=0
+        self.stop_move=0
+        self.ready=0
+        self.mini_target=0
+        self.get_screen()
+        self.is_target=0
+        first = self.first_mini
+        threading.Thread(target=self.move_thread).start()
+        while not self.ready:
+            time.sleep(0.1)
+        if not self.ang_off and self.mini_state == 1:
+            if self.check("z",0.5906,0.9537,mask="mask_z",threshold=0.95):
+                if self.floor == 11:
+                    self.floor = 12
+        keyops.keyDown("w")
+        wt = 3
+        self.first_mini = 0
+        sft = 0
+        if self.mini_state==1:
+            wt += 1
+            if self.mini_target!=2:
+                self.press('shift')
+                sft = 1
+            if self.mini_target==1:
+                wt += 0.8
+        need_confirm=0
+        init_time = time.time()
+        while True:
+            self.get_screen()
+            if self._stop == 1:
+                keyops.keyUp("w")
+                self.stop_move=1
+                break
+            if self.mini_target==1:
+                if self.check("f", 0.4443, 0.4417, mask="mask_f1"):
+                    self.press('f')
+                    log.info('发现事件交互')
+                    self.stop_move=1
+                    need_confirm = 1
+                    if self.nof(must_be='event'):
+                        keyops.keyUp("w")
+                        return
+                    break
+            else:
+                if self.goodf() and not (self.ts.sim("黑塔") and time.time() - self.quit < 30):
+                    self.press('f')
+                    log.info('need_confirm '+self.ts.text)
+                    self.stop_move=1
+                    need_confirm = 1
+                    if self.nof():
+                        keyops.keyUp("w")
+                        return
+                    break
+                if self.check("auto_2", 0.0583, 0.0769): 
+                    keyops.keyUp("w")
+                    self.stop_move=1
+                    self.mini_state+=2
+                    break
+                if self.check("z",0.5906,0.9537,mask="mask_z",threshold=0.95):
+                    self.stop_move=1
+                    time.sleep(1.7+self.slow*1.1)
+                    if self.mini_state==1 and self.floor==12:
+                        keyops.keyUp("w")
+                        for i in range(4):
+                            self.press(str(i+1))
+                            time.sleep(0.4)
+                            self.press('e')
+                            time.sleep(1.5)
+                            self.get_screen()
+                            if not self.check("z",0.5906,0.9537,mask="mask_z",threshold=0.95):
+                                break
+                            if self._stop:
+                                break
+                        keyops.keyDown("w")
+                    iters = 0
+                    while self.check("z",0.5906,0.9537,mask="mask_z",threshold=0.95) and not self._stop:
+                        iters+=1
+                        if iters>4:
+                            break
+                        pyautogui.click()
+                        if iters == 2:
+                            time.sleep(0.6)
+                            self.press('d',0.85)
+                            self.press('a',0.3)
+                        else:
+                            time.sleep(0.9)
+                        self.get_screen()
+                    self.mini_state+=2
+                    break
+            if time.time()-init_time>wt:
+                self.stop_move=1
+                keyops.keyUp("w")
+                self.mini_state+=2
+                if self.mini_state>=7:
+                    self.lst_changed = 0
+                    return
+                self.press('s',0.3)
+                self.press('a',0.7)
+                self.press('d',0.45)
+                self.press('w',0.5)
+                break
+            time.sleep(0.1)
+        self.stop_move=1
+        keyops.keyUp("w")
+        if need_confirm or (first and self.mini_target!=2):
+            for i in "sasddwwaa":
+                if self._stop:
+                    return
+                self.get_screen()
+                if self.mini_target==1:
+                    if self.check("f", 0.4443, 0.4417, mask="mask_f1"):
+                        self.press('f')
+                        if self.nof(must_be='event'):
+                            return
+                elif self.goodf() and not (self.ts.sim("黑塔") and time.time() - self.quit < 30):
+                    self.press('f')
+                    if self.nof():
+                        return
+                self.press(i, 0.25)
+                time.sleep(0.4)
+            pyautogui.click()

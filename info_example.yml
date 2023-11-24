@@ -11,19 +11,21 @@ config:
   - 4
   #校准值
   angle: 1.0
-  #难度
-  difficulty: 4
+  #难度，1-5，（5代表最高难度，如果世界没有难度5则会选择难度4）
+  difficulty: 5
   #主命途
   fate: 巡猎
   #副命途
   secondary_fate:
-  - 巡猎
   - 毁灭
+  - 巡猎
+  - 丰饶
   #后面这些无视即可
   map_sha: ''
   show_map_mode: 0
   debug_mode: 0
   speed_mode: 0
+  slow_mode: 0
   force_update: 0
   timezone: Default
 #奇物，事件和祝福的优先级。祝福优先级只对主命途生效
@@ -33,11 +35,13 @@ prior:
   奇物:
   - 福灵胶
   - 博士之袍
+  - 陨石球
   - 降维骰子
   - 信仰债券
   - 时空棱镜
   - 朋克洛德
   - 香涎干酪
+  - 龋齿星系
   事件:
   - 购买一个
   - 丢下雕像
