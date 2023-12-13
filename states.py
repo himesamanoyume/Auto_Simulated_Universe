@@ -23,7 +23,7 @@ import pyuac
 import utils.keyops as keyops
 
 # 版本号
-version = "v6.051 E"
+version = "v6.051 HIME"
 
 
 class SimulatedUniverse(UniverseUtils):
@@ -57,7 +57,7 @@ class SimulatedUniverse(UniverseUtils):
             try:
                 lowest = (
                     requests.get(
-                        "https://api.github.com/repos/CHNZYX/Auto_Simulated_Universe/releases/latest"
+                        "https://api.github.com/repos/himesamanoyume/Auto_Simulated_Universe/releases/latest"
                     )
                     .json()["name"]
                     .split("lowest")[1]

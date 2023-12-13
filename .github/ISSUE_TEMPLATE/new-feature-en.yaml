@@ -22,7 +22,7 @@ body:
       options:
         - label: "I'm sure this is a feature that has never been proposed or implemented."
           required: true
-        - label: "I have looked in [Issue Tracker](https://github.com/CHNZYX/Auto_Simulated_Universe/issues) and [Pull Request](https://github.com/CHNZYX/Auto_Simulated_Universe/pulls) for the feature I'm proposing, and did not find an ISSUE or PR for the same feature."
+        - label: "I have looked in [Issue Tracker](https://github.com/himesamanoyume/Auto_Simulated_Universe/issues) and [Pull Request](https://github.com/CHNZYX/Auto_Simulated_Universe/pulls) for the feature I'm proposing, and did not find an ISSUE or PR for the same feature."
           required: true
         - label: I am aware and agree that this is for suggesting new features only. If this Issue is about another off-topic issue, my Issue may be automatically closed or/and locked unconditionally.
           required: true

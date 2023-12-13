@@ -22,7 +22,7 @@ body:
       options:
         - label: "I've tested this using an environment that is clean and free of other non-essential plugins and the problem persists."
           required: true
-        - label: "I have looked in [Issue Tracker](https://github.com/CHNZYX/Auto_Simulated_Universe/issues) for the issue I want to raise and did not find an ISSUE for the same issue."
+        - label: "I have looked in [Issue Tracker](https://github.com/himesamanoyume/Auto_Simulated_Universe/issues) for the issue I want to raise and did not find an ISSUE for the same issue."
           required: true
         - label: I am aware and agree that if this Issue is about something other than the program itself, my Issue may be automatically closed or/and locked unconditionally.
           required: true
