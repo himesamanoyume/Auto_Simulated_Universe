@@ -214,29 +214,3 @@ F8/‘停止’按钮停止运行。
 
 录制结束后可以暂离并重新运行自动化测试地图，如果通过测试，你就成功录制到了新图！
 
-----------------------------------------------------------------------------------------------
-
-欢迎加入，欢迎反馈bug，QQ群：831830526
-
-----------------------------------------------------------------------------------------------
-
-如果喜欢本项目，可以打赏送作者一杯咖啡喵！
-
-![打赏](https://github.com/CHNZYX/Auto_Simulated_Universe/blob/main/imgs/money.jpg)
-
-----------------------------------------------------------------------------------------------
-## 贡献者
-
-感谢以下贡献者对本项目做出的贡献
-
-<a href="https://github.com/CHNZYX/Auto_Simulated_Universe/graphs/contributors">
-
-  <img src="https://contrib.rocks/image?repo=CHNZYX/Auto_Simulated_Universe" />
-
-</a>
-
-![Alt](https://repobeats.axiom.co/api/embed/a24da575ebc375e58ec8d8a0d7fff6d26306d2fc.svg "Repobeats analytics image")
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=CHNZYX/Auto_Simulated_Universe&type=Date)](https://star-history.com/#CHNZYX/Auto_Simulated_Universe&Date)
