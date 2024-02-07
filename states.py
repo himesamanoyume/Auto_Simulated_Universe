@@ -23,7 +23,7 @@ import pyuac
 import utils.keyops as keyops
 
 # 版本号
-version = "v6.1"
+version = "v6.11"
 
 
 class SimulatedUniverse(UniverseUtils):
@@ -195,7 +195,7 @@ class SimulatedUniverse(UniverseUtils):
             if self._stop:
                 break
             self.get_screen()
-            #self.click_target('imgs/conti.jpg',0.9,True) # 如果需要输出某张图片在游戏窗口中的坐标，可以用这个
+            #self.click_target('imgs/e.jpg',0.9,True) # 如果需要输出某张图片在游戏窗口中的坐标，可以用这个
             """
             if begin and not self.check("f", 0.4437,0.4231) and not self.check("abyss/1",0.8568,0.6769):
                 begin = 0
@@ -565,12 +565,21 @@ class SimulatedUniverse(UniverseUtils):
                 return 1
             if self.multi == 1.01:
                 align_angle(0, 1, [1], self)
+            self.get_screen()
+            if self.floor > 0 and self.check("ruan",0.0625,0.7065) and not self.check("U", 0.0240,0.7759):
+                self.press('e')
+                time.sleep(1.5)
+                self.get_screen()
+                if self.check('e',0.4995,0.7500):
+                    self.solve_snack()
             # 寻路
             if self.mini_state:
                 self.get_direc_only_minimap()
             else:
                 self.get_direc()
             return 2
+        elif self.check('e',0.4995,0.7500):
+            self.solve_snack()
         elif self.check("init", 0.9120,0.8361):
             if self.end:
                 time.sleep(1)
@@ -596,6 +605,7 @@ class SimulatedUniverse(UniverseUtils):
             self.floor_init = 1
         elif self.check("start", 0.6594, 0.8389):
             self.fail_count = 0
+            self.allow_e = 1
             if self.check("team4", 0.5797, 0.2389):
                 dx = 0.9266 - 0.8552
                 dy = 0.8194 - 0.6741
@@ -610,9 +620,22 @@ class SimulatedUniverse(UniverseUtils):
             self.confirm_time = time.time()
         elif self.check("fate", 0.9432,0.9389):
             time.sleep(0.6)
-            self.get_screen()
-            img = self.check("z", 0.4969, 0.3750, mask="mask_fate", large=False)
-            res = self.ts.split_and_find([self.fate], img)
+            click_x = [0.02, 0.98]
+            n = 4  # 重试次数
+            res = None
+            while n:
+                self.get_screen()
+                img = self.check("z", 0.4969, 0.3750, mask="mask_fate", large=False)
+                res = self.ts.split_and_find([self.fate], img)
+                if res[1] == 1 and n:
+                    # 没有找到命途
+                    log.info(f"未找到 {self.fate} 命途，尝试翻页")
+                    self.click((click_x[n % len(click_x)], 0.5))
+                    n -= 1
+                    time.sleep(0.5)
+                    continue
+                else:
+                    break
             self.click(self.calc_point((0.4969, 0.3750), res[0]))
         elif self.check("fate_3", 0.9422, 0.9472):
             if not self.click_text(['2星祝福','奇物']):
