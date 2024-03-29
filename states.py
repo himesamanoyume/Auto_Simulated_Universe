@@ -23,7 +23,7 @@ import pyuac
 import utils.keyops as keyops
 
 # 版本号
-version = "v6.12"
+version = "v6.3"
 
 
 class SimulatedUniverse(UniverseUtils):
@@ -72,7 +72,7 @@ class SimulatedUniverse(UniverseUtils):
                 try:
                     lowest = requests.get(
                         "https://chnzyx.github.io/asu_version_check/"
-                    ).text.strip()
+                    ).text.strip().split('\n')[0]
                     log.info("版本下限：v" + lowest)
                 except:
                     log.info("网络异常")#，强制退出")
@@ -119,8 +119,9 @@ class SimulatedUniverse(UniverseUtils):
         self.fail_count = 0
         self.nums = nums
         self.end = 0
+        self.quan = 0
         ex_notif = ""
-        if not debug:
+        if debug != 2:
             pyautogui.FAILSAFE = False
         if bonus:
             ex_notif = " 自动领取沉浸奖励"
@@ -195,7 +196,7 @@ class SimulatedUniverse(UniverseUtils):
             if self._stop:
                 break
             self.get_screen()
-            #self.click_target('imgs/lack.jpg',0.9,True) # 如果需要输出某张图片在游戏窗口中的坐标，可以用这个
+            #self.click_target('imgs/huangquan.jpg',0.9,True) # 如果需要输出某张图片在游戏窗口中的坐标，可以用这个
             """
             if begin and not self.check("f", 0.4437,0.4231) and not self.check("abyss/1",0.8568,0.6769):
                 begin = 0
@@ -251,24 +252,19 @@ class SimulatedUniverse(UniverseUtils):
         self.update_count(0)
         self.my_cnt += 1
         tm = int((time.time() - self.init_tm) / 60)
-        remain = 34 - self.count
-        if remain > 0:
-            remain = int(remain * (time.time() - self.init_tm) / self.my_cnt / 60)
+        remain_round = self.nums-self.my_cnt
+        if remain_round > 0:
+            remain = int(remain_round * (time.time() - self.init_tm) / self.my_cnt / 60)
         else:
             remain = 0
-        if (
-            notif(
-                "已完成",
-                f"计数:{self.count} 已使用：{tm//60}小时{tm%60}分钟  平均{tm//self.my_cnt}分钟一次  预计剩余{remain//60}小时{remain%60}分钟",
-                cnt=str(self.count),
-            )
-            >= 34
-            and self.debug == 0 and self.check_bonus == 0
-        ) and self.nums == 10000:
-            log.info('已完成每周上限，准备停止运行')
-            self.end = 1
-        if self.nums == self.my_cnt:
-            log.info('已完成指定次数，准备停止运行')
+            remain_round = -1
+        notif(
+            "已完成",
+            f"计数:{self.count} 剩余:{remain_round} 已使用：{tm//60}小时{tm%60}分钟  平均{tm//self.my_cnt}分钟一次  预计剩余{remain//60}小时{remain%60}分钟",
+            cnt=str(self.count),
+        )
+        if self.debug == 0 and self.check_bonus == 0 and self.nums <= self.my_cnt and self.nums >= 0:
+            log.info('已完成上限，准备停止运行')
             self.end = 1
         self.floor = 0
 
@@ -356,12 +352,15 @@ class SimulatedUniverse(UniverseUtils):
                     self.click(self.calc_point((0.5042, 0.3204), res_down[0]))
                 else:
                     self.click(self.calc_point((0.5047, 0.5491), res_up[0]))
+                time.sleep(0.4)
             self.click((0.1203, 0.1093))
             tm=time.time()
             while time.time()-tm<1.6 and self.check("choose_bless", 0.9266, 0.9491):
                 time.sleep(0.1)
                 self.get_screen()
             self.confirm_time = time.time()
+            if self.quan:
+                self.use_e()
             return 1
         # F交互界面
         elif self.check("f", 0.4443, 0.4417, mask="mask_f1", threshold=0.96):
@@ -409,6 +408,8 @@ class SimulatedUniverse(UniverseUtils):
                     return 1
         # 跑图状态
         if self.isrun():
+            if self.speed and not self.quan and self.check("huangquan", 0.0578,0.7083):
+                self.quan = 1
             if self.floor_init == 0:
                 self.get_level()
                 self.floor_init = 1
@@ -764,7 +765,7 @@ class SimulatedUniverse(UniverseUtils):
         elif self.check("yes1", 0.5, 0.5, mask="mask_end"):
             self.click((self.tx,self.ty))
             time.sleep(1)
-            return 1
+            return 0
         else:
             return 0
         return 1
@@ -1018,6 +1019,8 @@ def main():
         consumable = config.use_consumable
     if slow == -1:
         slow = config.slow_mode
+    if nums == 34:
+        nums = config.max_run
     log.info(f"find: {find}, debug: {debug}, show_map: {show_map}, consumable: {consumable}")
     su = SimulatedUniverse(find, debug, show_map, speed, consumable, slow, nums=nums, bonus=bonus, update=update, fate=fate)
     try:
