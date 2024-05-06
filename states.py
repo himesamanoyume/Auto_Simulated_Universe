@@ -98,8 +98,7 @@ class SimulatedUniverse(UniverseUtils):
         self.img_set = []
         self.find = find
         self.debug = debug
-        # self.speed = speed
-        self.speed = 0
+        self.speed = speed
         self.consumable = consumable
         self.slow = slow
         self._show_map = show_map & find
