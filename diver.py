@@ -32,7 +32,7 @@ version = "v7.11"
 
 
 class DivergentUniverse(UniverseUtils):
-    def __init__(self, debug=0, nums=-1, speed=0):
+    def __init__(self, debug=0, nums=1, speed=0):
         super().__init__()
         self._stop = True
         self.end = 0
@@ -62,6 +62,7 @@ class DivergentUniverse(UniverseUtils):
         if debug != 2:
             pyautogui.FAILSAFE = False
         self.update_count()
+        log.info(f"将运行{self.nums}次")
         notif("开始运行", f"初始计数：{self.count}")
         set_debug(debug > 0)
 
@@ -871,7 +872,7 @@ class DivergentUniverse(UniverseUtils):
             f"计数:{self.count} 剩余:{remain_round} 已使用：{tm//60}小时{tm%60}分钟  平均{tm//self.my_cnt}分钟一次  预计剩余{remain//60}小时{remain%60}分钟",
             cnt=str(self.count),
         )
-        if self.debug == 0 and self.check_bonus == 0 and self.nums <= self.my_cnt and self.nums >= 0:
+        if self.debug == 0 and self.nums <= self.my_cnt and self.nums >= 0:
             log.info('已完成上限，准备停止运行')
             self.end = 1
         self.floor = 0
