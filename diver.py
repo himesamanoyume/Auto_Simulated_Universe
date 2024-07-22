@@ -28,7 +28,7 @@ import bisect
 from collections import defaultdict
 
 # 版本号
-version = "v7.11"
+version = "v7.15"
 
 
 class DivergentUniverse(UniverseUtils):
@@ -59,6 +59,8 @@ class DivergentUniverse(UniverseUtils):
         self.saved_num = 0
         self.default_json_path = "actions/default.json"
         self.default_json = self.load_actions(self.default_json_path)
+        if config.weekly_mode:
+            self.default_json['模式选择'][0]['actions'][1]['text'] = '周期演算'
         if debug != 2:
             pyautogui.FAILSAFE = False
         self.update_count()
@@ -100,20 +102,24 @@ class DivergentUniverse(UniverseUtils):
         # exit()
         res = self.run_static()
         if res == '':
-            text = self.merge_text(self.ts.find_with_box([400, 1920, 100, 600], redundancy=0))
-            if self.speed and '转化' in text and '继续战斗' not in text and ('数据' in text or '过量' in text):
-                print('ready to stop')
-                time.sleep(6)
-                tm = time.time()
-                while time.time() - tm < 15:
-                    print('trying to stop')
-                    self.press('esc')
-                    time.sleep(2)
-                    self.ts.forward(self.get_screen())
-                    static_res = self.run_static(action_list=['过量转化'])
-                    if static_res != '':
-                        print(static_res)
-                        break
+            area_text = self.clean_text(self.ts.ocr_one_row(self.screen, [50, 350, 3, 35]), char=0)
+            if '位面' in area_text or '区域' in area_text or '第' in area_text:
+                self.area()
+            else:
+                text = self.merge_text(self.ts.find_with_box([400, 1920, 100, 600], redundancy=0))
+                if self.speed and '转化' in text and '继续战斗' not in text and ('数据' in text or '过量' in text):
+                    print('ready to stop')
+                    time.sleep(6)
+                    tm = time.time()
+                    while time.time() - tm < 15:
+                        print('trying to stop')
+                        self.press('esc')
+                        time.sleep(2)
+                        self.ts.forward(self.get_screen())
+                        static_res = self.run_static(action_list=['过量转化'])
+                        if static_res != '':
+                            print(static_res)
+                            break
         if self.end and res == '加载界面':
             self.press('esc')
             time.sleep(2)
@@ -354,7 +360,7 @@ class DivergentUniverse(UniverseUtils):
                 print(text_list)
                 if self.check_f(is_in=text_list):
                     self.press('f')
-                    for _ in range(2):
+                    for _ in range(1):
                         self.press('s',0.2)
                         self.press('f')
                     return 1
@@ -405,7 +411,7 @@ class DivergentUniverse(UniverseUtils):
                 if portal['score'] == 0:
                     portal = self.find_portal()
             else:
-                if self.forward_until([portal['type'] if portal['score'] else '区域'], timeout=3, moving=moving):
+                if self.forward_until([portal['type']] if portal['score'] else ['区域','结束','退出'], timeout=3, moving=moving):
                     self.init_floor()
                     return
                 else:
@@ -440,7 +446,7 @@ class DivergentUniverse(UniverseUtils):
         event_weight = [2*self.speed, 1, -10]
         for i in range(3):
             for e in event[i].split('-'):
-                if e in text:
+                if e in text and len(e):
                     score += event_weight[i]
         return score
 
@@ -449,7 +455,7 @@ class DivergentUniverse(UniverseUtils):
         self.event_solved = 1
         tm = time.time()
         while time.time() - tm < 20:
-            title_text = self.merge_text(self.ts.find_with_box([170, 850, 900, 1020], redundancy=0), char=0)
+            title_text = self.clean_text(self.ts.ocr_one_row(self.screen, [185, 820, 945, 1005]), char=0)
             print(title_text)
             if event_id[0] == -1:
                 for i, e in enumerate(self.event_prior):
@@ -458,10 +464,6 @@ class DivergentUniverse(UniverseUtils):
                 start = self.now_event == event_id[1]
                 self.now_event = event_id[1]
                 print('event_id:', event_id)
-                if self.debug and event_id[0] == -1:
-                    print(self.ts.res)
-                    while 1:
-                        time.sleep(1)
             if '事件' not in self.merge_text(self.ts.find_with_box([92, 195, 54, 88])):
                 return
             
@@ -473,6 +475,10 @@ class DivergentUniverse(UniverseUtils):
                 self.click((self.tx, self.ty))
             # 事件选择界面
             elif self.check("star", 0.1828, 0.5000, mask="mask_event", threshold=0.965):
+                if self.debug and event_id[0] == -1:
+                    print(self.ts.res)
+                    while 1:
+                        time.sleep(1)
                 tx, ty = self.tx, self.ty
                 self.ts.forward(self.screen)
                 clicked = 0
@@ -480,11 +486,13 @@ class DivergentUniverse(UniverseUtils):
                     text = self.ts.find_with_box([1300, 1920, 100, 1080], redundancy=30)
                     events = []
                     event_now = None
+                    last_star = 0
                     for i in text:
-                        if i['raw_text'].startswith('米'):
+                        if self.check_box("star", [1250, 1460, i['box'][2]-30, i['box'][3]+30]) and last_star<self.ty-20:
+                            last_star = self.ty
                             if event_now is not None:
                                 events.append(event_now)
-                            event_now = {'raw_text': i['raw_text'][1:], 'box': i['box']}
+                            event_now = {'raw_text': i['raw_text'].lstrip('米'), 'box': i['box']}
                         else:
                             if event_now is not None:
                                 event_now['raw_text'] += i['raw_text']
@@ -586,23 +594,24 @@ class DivergentUniverse(UniverseUtils):
             if abs(event_text - 950) > 40:
                 self.press(key,0.2)
                 event_text_after = self.find_event_text()
-                if event_text_after == 0:
-                    return
-                sub = event_text - event_text_after
-                if key == 'a':
-                    sub = -sub
-                print('sub:', sub)
-                if sub < 60:
-                    sub = 100
-                if sub < 200:
-                    sub = int((event_text_after - 950) / min(150, sub))
-                    sub = min(5, max(-5, int(sub)))
-                    for _ in range(sub):
-                        self.press('d',0.2)
-                        time.sleep(0.1)
-                    for _ in range(-sub):
-                        self.press('a',0.2)
-                        time.sleep(0.1)
+                if event_text_after:
+                    sub = event_text - event_text_after
+                    if key == 'a':
+                        sub = -sub
+                    print('sub:', sub)
+                    if sub < 60:
+                        sub = 100
+                    if sub < 200:
+                        sub = int((event_text_after - 950) / min(150, sub))
+                        sub = min(5, max(-5, int(sub)))
+                        for _ in range(sub):
+                            self.press('d',0.2)
+                            time.sleep(0.1)
+                        for _ in range(-sub):
+                            self.press('a',0.2)
+                            time.sleep(0.1)
+                else:
+                    self.press('a' if key == 'd' else 'd', 0.2)
             self.forward_until(['事件','奖励','遭遇','交易'], timeout=2.5, moving=0)
         else:
             if deep < 3:
@@ -707,8 +716,9 @@ class DivergentUniverse(UniverseUtils):
             keyops.keyDown('w')
             self.press('a', 0.3)
             time.sleep(3)
-            self.press('d', 0.3)
+            self.press('d', 0.2)
             keyops.keyUp('w')
+            time.sleep(0.25)
             self.portal_opening_days(aimed=1)
         elif area_now == '商店':
             pyautogui.click()
@@ -721,7 +731,10 @@ class DivergentUniverse(UniverseUtils):
             self.portal_opening_days(static=1)
         elif area_now == '首领':
             if self.floor == 13 and self.area_state > 0:
-                self.close_and_exit()
+                if config.weekly_mode:
+                    self.portal_opening_days(aimed=1)
+                else:
+                    self.close_and_exit()
                 self.end_of_uni()
                 return
             if self.area_state == 0:
@@ -772,10 +785,10 @@ class DivergentUniverse(UniverseUtils):
                     keyops.keyUp('d')
                     self.portal_opening_days(static=1)
                 else:
-                    self.portal_opening_days()
+                    self.portal_opening_days(static=1)
             else:
                 time.sleep(1)
-                self.portal_opening_days()
+                self.portal_opening_days(static=1)
         elif area_now == '战斗':
             if self.area_state == 0:
                 self.press('w', 3)
@@ -808,6 +821,8 @@ class DivergentUniverse(UniverseUtils):
             self.keys.fff = 0
             self.portal_opening_days(static=1)
         elif area_now == '位面':
+            pyautogui.click()
+            time.sleep(2)
             self.close_and_exit()
         else:
             self.press('F4')
