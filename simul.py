@@ -145,13 +145,13 @@ class SimulatedUniverse(UniverseUtils):
             Text = win32gui.GetWindowText(hwnd)
             warn_game = False
             cnt = 0
-            while Text != "崩坏：星穹铁道" and not self._stop:
+            while Text != "崩坏：星穹铁道" and Text != "云·星穹铁道" and not self._stop:
                 self.lst_changed = time.time()
                 if self._stop:
                     raise KeyboardInterrupt
                 if not warn_game:
                     warn_game = True
-                    log.warning("等待游戏窗口")
+                    log.warning(f"等待游戏窗口，当前窗口：{Text}")
                 time.sleep(0.5)
                 cnt += 1
                 if cnt == 1200:
@@ -161,7 +161,7 @@ class SimulatedUniverse(UniverseUtils):
             if self._stop:
                 break
             self.get_screen()
-            #self.click_target('imgs/huangquan.jpg',0.9,True) # 如果需要输出某张图片在游戏窗口中的坐标，可以用这个
+            # self.click_target('imgs/fail.jpg',0.9,True) # 如果需要输出某张图片在游戏窗口中的坐标，可以用这个
             """
             if begin and not self.check("f", 0.4437,0.4231) and not self.check("abyss/1",0.8568,0.6769):
                 begin = 0
@@ -376,7 +376,8 @@ class SimulatedUniverse(UniverseUtils):
             if self.speed and not self.quan and self.check("huangquan", 0.0578,0.7083):
                 self.quan = 1
             if self.floor_init == 0:
-                self.get_level()
+                if self.get_level() == -1:
+                    return 1
                 self.floor_init = 1
             self.lst_changed = bk_lst_changed
             self.battle = 0
@@ -733,6 +734,9 @@ class SimulatedUniverse(UniverseUtils):
             self.click((self.tx,self.ty))
             time.sleep(1)
             return 0
+        elif self.check("fail", 0.6276, 0.0843):
+            self.click((self.tx, self.ty))
+            time.sleep(1.8)
         else:
             return 0
         return 1

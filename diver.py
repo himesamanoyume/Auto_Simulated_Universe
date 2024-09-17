@@ -28,7 +28,7 @@ import bisect
 from collections import defaultdict
 
 # 版本号
-version = "v7.15"
+version = "v7.2"
 
 
 class DivergentUniverse(UniverseUtils):
@@ -77,13 +77,13 @@ class DivergentUniverse(UniverseUtils):
             Text = win32gui.GetWindowText(hwnd)
             warn_game = False
             cnt = 0
-            while Text != "崩坏：星穹铁道" and not self._stop:
+            while Text != "崩坏：星穹铁道" and Text != "云·星穹铁道" and not self._stop:
                 self.lst_changed = time.time()
                 if self._stop:
                     raise KeyboardInterrupt
                 if not warn_game:
                     warn_game = True
-                    log.warning("等待游戏窗口")
+                    log.warning(f"等待游戏窗口，当前窗口：{Text}")
                 time.sleep(0.5)
                 cnt += 1
                 if cnt == 1200:
@@ -105,6 +105,8 @@ class DivergentUniverse(UniverseUtils):
             area_text = self.clean_text(self.ts.ocr_one_row(self.screen, [50, 350, 3, 35]), char=0)
             if '位面' in area_text or '区域' in area_text or '第' in area_text:
                 self.area()
+            elif self.check("c", 0.9417, 0.1204, threshold=0.965):
+                self.press('v')
             else:
                 text = self.merge_text(self.ts.find_with_box([400, 1920, 100, 600], redundancy=0))
                 if self.speed and '转化' in text and '继续战斗' not in text and ('数据' in text or '过量' in text):
@@ -660,7 +662,7 @@ class DivergentUniverse(UniverseUtils):
         if self.area_state == 0:
             if '黄泉' in self.team_member and '黄泉' in config.skill_char:
                 self.quan = 1
-            if area_now == '战斗' and self.quan and self.allow_e and self.floor > 1:
+            if area_now == '战斗' and self.quan and self.allow_e:
                 self.press(str(self.team_member['黄泉']+1))
             else:
                 self.press(self.long_range)
@@ -731,10 +733,7 @@ class DivergentUniverse(UniverseUtils):
             self.portal_opening_days(static=1)
         elif area_now == '首领':
             if self.floor == 13 and self.area_state > 0:
-                if config.weekly_mode:
-                    self.portal_opening_days(aimed=1)
-                else:
-                    self.close_and_exit()
+                self.close_and_exit()
                 self.end_of_uni()
                 return
             if self.area_state == 0:
@@ -887,7 +886,7 @@ class DivergentUniverse(UniverseUtils):
             f"计数:{self.count} 剩余:{remain_round} 已使用：{tm//60}小时{tm%60}分钟  平均{tm//self.my_cnt}分钟一次  预计剩余{remain//60}小时{remain%60}分钟",
             cnt=str(self.count),
         )
-        if self.debug == 0 and self.nums <= self.my_cnt and self.nums >= 0:
+        if self.debug == 0 and self.check_bonus == 0 and self.nums <= self.my_cnt and self.nums >= 0:
             log.info('已完成上限，准备停止运行')
             self.end = 1
         self.floor = 0
