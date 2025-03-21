@@ -37,7 +37,7 @@ jobs:
         pip install numpy==1.26.4
 
     - name: Pack Flet Application
-      run: flet pack gui.py --icon imgs/icon_m.png --uac-admin --add-data "utils/models;utils/models" -y
+      run: flet pack gui.py --icon imgs/icon_m.png --uac-admin --add-data "utils/models;utils/models" -D -y
 
     - name: Pyinstaller Application
       run: |
@@ -45,17 +45,18 @@ jobs:
 
     - name: Move assets to dist directory
       run: |
-        xcopy imgs dist\imgs /I /E
-        xcopy actions dist\actions /I /E
-        xcopy info_example.yml dist
-        xcopy info_example_old.yml dist
-        xcopy README.md dist
-        ren dist AutoSimulatedUniverse
+        xcopy imgs dist\gui\imgs /I /E
+        xcopy actions dist\gui\actions /I /E
+        xcopy info_example.yml dist\gui
+        xcopy info_example_old.yml dist\gui
+        xcopy README.md dist\gui
+        xcopy dist\notif.exe dist\gui
+        ren dist\gui AutoSimulatedUniverse
 
     - name: Create zip archive
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        $files = Get-ChildItem -Path AutoSimulatedUniverse
+        $files = Get-ChildItem -Path dist\AutoSimulatedUniverse
         Compress-Archive -Path $files.FullName -DestinationPath "AutoSimulatedUniverse_${{ github.ref_name }}.zip" -Force
 
     - name: Install dependencies for cpu mode
@@ -64,7 +65,7 @@ jobs:
         pip install onnxruntime
 
     - name: Pack Flet Application
-      run: flet pack gui.py --icon imgs/icon_m.png --uac-admin --add-data "utils/models;utils/models" -y
+      run: flet pack gui.py --icon imgs/icon_m.png --uac-admin --add-data "utils/models;utils/models" -D -y
 
     - name: Pyinstaller Application
       run: |
@@ -72,17 +73,18 @@ jobs:
 
     - name: Move assets to dist directory
       run: |
-        xcopy imgs dist\imgs /I /E
-        xcopy actions dist\actions /I /E
-        xcopy info_example.yml dist
-        xcopy info_example_old.yml dist
-        xcopy README.md dist
-        ren dist AutoSimulatedUniverse_cpu
+        xcopy imgs dist\gui\imgs /I /E
+        xcopy actions dist\gui\actions /I /E
+        xcopy info_example.yml dist\gui
+        xcopy info_example_old.yml dist\gui
+        xcopy README.md dist\gui
+        xcopy dist\notif.exe dist\gui
+        ren dist\gui AutoSimulatedUniverse_cpu
 
     - name: Create zip archive
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        $files = Get-ChildItem -Path AutoSimulatedUniverse_cpu
+        $files = Get-ChildItem -Path dist\AutoSimulatedUniverse_cpu
         Compress-Archive -Path $files.FullName -DestinationPath "AutoSimulatedUniverse_${{ github.ref_name }}_cpu.zip" -Force
 
     - name: Create release

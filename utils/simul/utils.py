@@ -1478,23 +1478,18 @@ class UniverseUtils:
 
     def solve_snack(self):
         self.get_screen()
-        f = 0
         if self.check('snack', 0.3844,0.5065, mask='mask_snack'):
             self.click((self.tx,self.ty))
             time.sleep(0.3)
-            self.click((0.3807,0.2472))
+            self.click_position([1184, 815])
             time.sleep(0.4)
-            f = 1
         else:
             self.allow_e = 0
-        self.press('esc')
-        if not self.quan:
-            time.sleep(1)
+            time.sleep(1.0)
+        self.click_position([768, 815])
+        time.sleep(0.6)
+        if self.allow_e:
             self.press('e')
-        else:
-            for _ in range(2):
-                self.press('e')
-                time.sleep(0.2)
     
     def use_e(self):
         self.press('e')
@@ -1573,3 +1568,11 @@ class UniverseUtils:
             self.get_screen()
             if not self.check("choose_bless", 0.9266, 0.9491, threshold=0.945):
                 return
+
+    def click_box(self, box):
+        x = (box[0] + box[1]) / 2
+        y = (box[2] + box[3]) / 2
+        self.click((1 - x / self.xx, 1 - y / self.yy))
+
+    def click_position(self, position):
+        self.click_box([position[0], position[0], position[1], position[1]])

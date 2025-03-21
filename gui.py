@@ -2,7 +2,7 @@ import atexit
 import flet as ft
 import pyuac
 import threading
-import os
+import os, time
 import sys
 import psutil
 import shutil
@@ -48,22 +48,6 @@ def main(page: Page):
     page.go(page.route)
 
 def cleanup():
-    current_process = psutil.Process(os.getpid())
-    name = current_process.name()
-    if name.endswith('.exe') and name != 'python.exe':
-        try:
-            father = current_process.parent()
-            try:
-                father.terminate()
-            except:
-                pass
-            try:
-                father.kill()
-            except:
-                pass
-            psutil.wait_procs([father], timeout=5)
-        except:
-            pass
     os._exit(0)
 
 def clean_temp_files():
